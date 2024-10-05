@@ -8,6 +8,12 @@ logger.setLevel(logging.INFO)
 
 
 def generate_numbers(min: int, max: int) -> dict[str, int]:
+    """
+    Generate a dictionary with numbers between min and max
+    :param min: minimal number
+    :param max: maximal number
+    :return: a dictionary with numbers between min and max
+    """
     numbers: dict = {}
     for i in range(min, max + 1):
         word = num2words(i, lang='ru')
@@ -18,7 +24,12 @@ def generate_numbers(min: int, max: int) -> dict[str, int]:
 numbers = generate_numbers(1, 100)
 
 
-def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")):
+def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")) -> str:
+    """
+    Parse the equation and calculate the result
+    :param equation: a list with [number, operation, number]
+    :return: result of calculation
+    """
     logger.debug(equation)
 
     result_number = 0
@@ -38,6 +49,11 @@ def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")):
 
 
 def check_equation_string(equation: str) -> list | bool:
+    """
+    Check if the equation string is valid ("number operation number")
+    :param equation: string of the equation
+    :return: list of valid equations / False if equation string is invalid
+    """
     equation = re.split(r'(плюс|минус|умножить на|разделить на)', equation)
     equation = [element.strip() for element in equation]
     if len(equation) == 3:
@@ -45,7 +61,11 @@ def check_equation_string(equation: str) -> list | bool:
     return False
 
 
-def main():
+def main() -> None:
+    """
+    Main function of the program. Requests the user to input the equation and prints the result of the equation.
+    :return: nothing
+    """
     equation = input("Здравствуйте, введите математическое выражение. [число оператор число]\n").lower()
 
     equation = check_equation_string(equation)
