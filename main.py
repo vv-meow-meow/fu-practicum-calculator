@@ -7,15 +7,15 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def generate_numbers(min: int, max: int) -> dict[str, int]:
+def generate_numbers(min_num: int, max_num: int) -> dict[str, int]:
     """
     Generate a dictionary with numbers between min and max
-    :param min: minimal number
-    :param max: maximal number
+    :param min_num: minimal number
+    :param max_num: maximal number
     :return: a dictionary with numbers between min and max
     """
     numbers: dict = {}
-    for i in range(min, max + 1):
+    for i in range(min_num, max_num + 1):
         word = num2words(i, lang='ru')
         numbers[word] = i
     return numbers
