@@ -79,15 +79,42 @@ def parse_word_to_number(word_num: str) -> int:
     result_number *= negative
     return result_number
 
+
 def parse_number_to_word(number: int) -> str:
     if number < 10:
         for word, value in UNITS.items():
             if number == value:
                 return word
+    elif number < 20:
+        for word, value in TEENS.items():
+            if number == value:
+                return word
+    elif number < 100:
+        tens = (number // 10) * 10
+        units = number % 10
+        if units == 0:
+            for word, value in TEENS.items():
+                if number == value:
+                    return word
+        else:
+            result = []
+            for word, value in TENS.items():
+                if tens == value:
+                    result.append(word)
+                    break
+            for word, value in UNITS.items():
+                if units == value:
+                    result.append(word)
+                    break
+            return " ".join(result)
+    elif number < 1000:
+        hundreds = (number // 100) * 100
+        tens = ((number % 100) // 10) * 10
+
 
 if __name__ == '__main__':
     print("sup! numbers is __main__")
     r1 = parse_word_to_number("девятьсот двенадцать миллионов шестьсот двадцать пять тысяч сто сорок четыре")
-    r2 = parse_number_to_word(2)
+    r2 = parse_number_to_word(25)
     print(r1)
     print(r2)
