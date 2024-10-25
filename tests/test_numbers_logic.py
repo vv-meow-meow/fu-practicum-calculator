@@ -50,9 +50,9 @@ def test_parse_word_to_number(input_value, expected_output) -> None:
     (199, 'сто девяносто девять'),
     (200, 'двести'),
     (342, 'триста сорок два'),
-    (999, 'девятьсот девяносто девять')
+    (999, 'девятьсот девяносто девять'),
     # Negative tests: TODO
-    # (-10, 'минус десять')
+    (-10, 'минус десять'),
 ])
 def test_parse_number_to_word(input_value, expected_output) -> None:
     result = parse_number_to_word(input_value)

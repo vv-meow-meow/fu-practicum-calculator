@@ -52,6 +52,11 @@ ORDERS: dict[str, int] = {
 
 
 def parse_word_to_number(word_num: str) -> int:
+    """
+    Конвертирует строку с числом, записанным словами в число типа int
+    :param word_num: число, записанное словами
+    :return: Целое число
+    """
     words: list[str] = word_num.lower().split()
     result_number = 0
     current_number = 0
@@ -81,7 +86,13 @@ def parse_word_to_number(word_num: str) -> int:
 
 
 def parse_number_to_word(number: int) -> str:
-    def check_tens(teen_number: int) -> list[str]:
+    """
+    Конвертирует число в строку, записанную словами
+    :param number: число
+    :return: строка с числом, записанным словами
+    """
+
+    def parse_tens(teen_number: int) -> list[str]:
         if teen_number < 20:
             for word, value in TEENS.items():
                 if teen_number == value:
@@ -107,23 +118,30 @@ def parse_number_to_word(number: int) -> str:
         else:
             raise ValueError(f"Число {number} больше 99")
 
+    result = []
+    if number < 0:
+        result.append("минус")
+        number = abs(number)
+
     if number < 10:
         for word, value in UNITS.items():
             if number == value:
-                return word
+                result.append(word)
+                return " ".join(result)
     elif number < 100:
-        return " ".join(check_tens(number))
+        result.extend(parse_tens(number))
+        return " ".join(result)
     elif number < 1000:
         hundreds = (number // 100) * 100
         tens = ((number % 100) // 10) * 10
         units = number % 10
-        result = []
         for word, value in HUNDREDS.items():
             if hundreds == value:
                 result.append(word)
                 break
+
         if tens != 0:
-            result.extend(check_tens(tens + units))
+            result.extend(parse_tens(tens + units))
         else:
             if units != 0:
                 for word, value in UNITS.items():
