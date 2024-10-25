@@ -14,9 +14,6 @@ def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")) -
     :return: result of calculation
     """
     logger.debug(equation)
-
-    result_number = 0
-
     match equation[1]:
         case "плюс":
             result_number = parse_word_to_number(equation[0]) + parse_word_to_number(equation[2])
