@@ -1,7 +1,7 @@
 import re
 import logging
 
-from numbers import parse_number_word, parse_word_number
+from numbers_dict import parse_number_word, parse_word_to_number
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -19,13 +19,17 @@ def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")) -
 
     match equation[1]:
         case "плюс":
-            result_number = parse_word_number(equation[0]) + parse_word_number(equation[2])
+            result_number = parse_word_to_number(equation[0]) + parse_word_to_number(equation[2])
         case "минус":
-            result_number = parse_word_number(equation[0]) - parse_word_number(equation[2])
+            result_number = parse_word_to_number(equation[0]) - parse_word_to_number(equation[2])
         case "умножить на":
-            result_number = parse_word_number(equation[0]) * parse_word_number(equation[2])
+            result_number = parse_word_to_number(equation[0]) * parse_word_to_number(equation[2])
         case "разделить на":
-            result_number = parse_word_number(equation[0]) - parse_word_number(equation[2])
+            if parse_word_to_number(equation[2]) == 0:
+                return "Ошибка: деление на ноль"
+            result_number = parse_word_to_number(equation[0]) / parse_word_to_number(equation[2])
+        case _:
+            return "Ошибка: Неизвестная операция"
 
     result = parse_number_word(result_number)
     return result
