@@ -51,6 +51,30 @@ ORDERS: dict[str, int] = {
 }
 
 
+def _determine_thousand_form(num: int) -> str:
+    if num < 0:
+        raise ValueError("Negative numbers are not allowed")
+
+    if num % 10 == 1:
+        return "тысяча"
+    elif num % 10 < 5:
+        return "тысячи"
+    else:
+        return "тысяч"
+
+
+def _determine_million_form(num: int) -> str:
+    if num < 0:
+        raise ValueError("Negative numbers are not allowed")
+
+    if num % 10 == 1:
+        return "миллион"
+    if num % 10 < 5:
+        return "миллиона"
+    else:
+        return "миллионов"
+
+
 def parse_word_to_number(word_num: str) -> int:
     """
     Конвертирует строку с числом, записанным словами в число типа int
@@ -92,6 +116,11 @@ def parse_number_to_word(number: int) -> str:
     :return: строка с числом, записанным словами
     """
 
+    def parse_units(unit_number: int) -> list[str]:
+        for word, value in UNITS.items():
+            if unit_number == value:
+                return [word]
+
     def parse_tens(teen_number: int) -> list[str]:
         if teen_number < 20:
             for word, value in TEENS.items():
@@ -118,42 +147,80 @@ def parse_number_to_word(number: int) -> str:
         else:
             raise ValueError(f"Число {number} больше 99")
 
+    def parse_hundreds(hundreds_number: int) -> list[str]:
+        result = []
+        if hundreds_number < 10:
+            for word, value in UNITS.items():
+                if hundreds_number == value:
+                    result.append(word)
+                    return result
+        elif hundreds_number < 100:
+            result.extend(parse_tens(hundreds_number))
+            return result
+        elif hundreds_number < 1000:
+            hundreds = (hundreds_number // 100) * 100
+            tens = ((hundreds_number % 100) // 10) * 10
+            units = hundreds_number % 10
+            for word, value in HUNDREDS.items():
+                if hundreds == value:
+                    result.append(word)
+                    break
+
+            if tens != 0:
+                result.extend(parse_tens(tens + units))
+            else:
+                if units != 0:
+                    for word, value in UNITS.items():
+                        if units == value:
+                            result.append(word)
+                            break
+            return result
+
     result = []
     if number < 0:
         result.append("минус")
         number = abs(number)
 
-    if number < 10:
-        for word, value in UNITS.items():
-            if number == value:
-                result.append(word)
-                return " ".join(result)
-    elif number < 100:
-        result.extend(parse_tens(number))
-        return " ".join(result)
-    elif number < 1000:
-        hundreds = (number // 100) * 100
-        tens = ((number % 100) // 10) * 10
-        units = number % 10
-        for word, value in HUNDREDS.items():
-            if hundreds == value:
-                result.append(word)
-                break
+    groups: list[int] = []
+    while number > 0:
+        groups.append(number % 1000)
+        number //= 1000
 
-        if tens != 0:
-            result.extend(parse_tens(tens + units))
+    enumerated_groups = tuple(enumerate(groups))
+
+    for i in range(len(enumerated_groups) - 1, 0 - 1, -1):
+        enum_group: tuple[int, int] = enumerated_groups[i]
+        j = enum_group[0]
+        group = enum_group[1]
+
+        words = []
+
+        hundreds = (group // 100) * 100
+        tens_units = group % 100
+
+        if hundreds > 0:
+            words.extend(parse_hundreds(group))
+        elif 0 < tens_units < 10:
+            words.extend(parse_units(tens_units))
+
+        if j == 0:
+            result.extend(words)
+        elif j == 1:
+            result.extend(words)
+            result.append(_determine_thousand_form(group))
+        elif j == 2:
+            result.extend(words)
+            result.append(_determine_million_form(group))
         else:
-            if units != 0:
-                for word, value in UNITS.items():
-                    if units == value:
-                        result.append(word)
-                        break
-        return " ".join(result)
+            raise ValueError(f"Number {number} is too big (function support numbers up to million)")
+
+    return " ".join(result)
 
 
 if __name__ == '__main__':
     print("sup! numbers is __main__")
-    r1 = parse_word_to_number("девятьсот двенадцать миллионов шестьсот двадцать пять тысяч сто сорок четыре")
-    r2 = parse_number_to_word(105)
+    r1 = parse_word_to_number(
+        "сто пятьдесят два")  # девятьсот двенадцать миллионов шестьсот двадцать пять тысяч сто сорок четыре
+    r2 = parse_number_to_word(105_104_421)
     print(r1)
     print(r2)
