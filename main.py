@@ -1,7 +1,7 @@
 import re
 import logging
 
-from numbers_dict import parse_number_word, parse_word_to_number
+from numbers_dict import parse_number_to_word, parse_word_to_number
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -31,7 +31,7 @@ def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")) -
         case _:
             return "Ошибка: Неизвестная операция"
 
-    result = parse_number_word(result_number)
+    result = parse_number_to_word(result_number)
     return result
 
 

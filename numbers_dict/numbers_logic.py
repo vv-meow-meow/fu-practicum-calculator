@@ -81,40 +81,61 @@ def parse_word_to_number(word_num: str) -> int:
 
 
 def parse_number_to_word(number: int) -> str:
+    def check_tens(teen_number: int) -> str:
+        if teen_number < 20:
+            for word, value in TEENS.items():
+                if teen_number == value:
+                    return word
+        elif teen_number < 100:
+            tens = (teen_number // 10) * 10
+            units = teen_number % 10
+            if units == 0:
+                for word, value in TENS.items():
+                    if teen_number == value:
+                        return word
+            else:
+                result = []
+                for word, value in TENS.items():
+                    if tens == value:
+                        result.append(word)
+                        break
+                for word, value in UNITS.items():
+                    if units == value:
+                        result.append(word)
+                        break
+                return " ".join(result)
+        else:
+            raise ValueError(f"Число {number} больше 99")
+
     if number < 10:
         for word, value in UNITS.items():
             if number == value:
                 return word
-    elif number < 20:
-        for word, value in TEENS.items():
-            if number == value:
-                return word
     elif number < 100:
-        tens = (number // 10) * 10
-        units = number % 10
-        if units == 0:
-            for word, value in TEENS.items():
-                if number == value:
-                    return word
-        else:
-            result = []
-            for word, value in TENS.items():
-                if tens == value:
-                    result.append(word)
-                    break
-            for word, value in UNITS.items():
-                if units == value:
-                    result.append(word)
-                    break
-            return " ".join(result)
+        return check_tens(number)
     elif number < 1000:
         hundreds = (number // 100) * 100
         tens = ((number % 100) // 10) * 10
+        units = number % 10
+        result = []
+        for word, value in HUNDREDS.items():
+            if hundreds == value:
+                result.append(word)
+                break
+        for word, value in TENS.items():
+            if tens == value:
+                result.append(word)
+                break
+        for word, value in UNITS.items():
+            if units == value:
+                result.append(word)
+                break
+        return " ".join(result)
 
 
 if __name__ == '__main__':
     print("sup! numbers is __main__")
     r1 = parse_word_to_number("девятьсот двенадцать миллионов шестьсот двадцать пять тысяч сто сорок четыре")
-    r2 = parse_number_to_word(25)
+    r2 = parse_number_to_word(20)
     print(r1)
     print(r2)
