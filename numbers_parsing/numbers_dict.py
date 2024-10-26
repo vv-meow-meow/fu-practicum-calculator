@@ -16,6 +16,7 @@ UNITS_GENDER: dict[int, dict[str, str]] = {
         "feminine": "одна"},
     2: {"masculine": "два",
         "feminine": "две"},
+    # Остальные числа не меняются по роду
     3: {"masculine": "три",
         "feminine": "три"},
     4: {"masculine": "четыре",
