@@ -37,17 +37,27 @@ def _determine_million_form(num: int) -> str:
         return "миллионов"
 
 
-def parse_word_to_number(word_num: str) -> int:
+def parse_word_to_number(word_num: str) -> float:
     """
-    Конвертирует строку с числом, записанным словами в число типа int
+    Конвертирует строку с числом, записанным словами в число
     :param word_num: число, записанное словами
     :return: Целое число
     """
     words: list[str] = word_num.lower().split()
+
+    if "и" in words:
+        index = words.index("и")
+        integer_part_words = words[:index]
+        fractional_part_words = words[index + 1:]
+    else:
+        integer_part_words = words
+        fractional_part_words = []
+
     result_number = 0
     current_number = 0
+    fractional_part = 0.0
     negative = 1
-    for word in words:
+    for word in integer_part_words:
         if word == "минус":
             negative = -1
         elif word in HUNDREDS:
@@ -68,8 +78,22 @@ def parse_word_to_number(word_num: str) -> int:
         else:
             raise ValueError(f'Word "{word}" is not a valid number')
 
-    result_number += current_number
-    result_number *= negative
+    if fractional_part_words:
+        numerator_words = []
+        denominator = None
+
+        for i, word in enumerate(fractional_part_words):
+            if word in FRACTION_DENOMINATORS:
+                denominator = FRACTION_DENOMINATORS[word]
+                numerator_words = fractional_part_words[:i]
+                break
+
+        if denominator and numerator_words:
+            numerator_str = ' '.join(numerator_words)
+            numerator = parse_word_to_number(numerator_str)
+            fractional_part = numerator / denominator
+
+    result_number = (result_number + current_number + fractional_part) * negative
     return result_number
 
 
@@ -189,9 +213,5 @@ def parse_number_to_word(number: int) -> str:
 
 
 if __name__ == '__main__':
-    print("sup! numbers is __main__")
-    r1 = parse_word_to_number(
-        "сто пятьдесят два")  # девятьсот двенадцать миллионов шестьсот двадцать пять тысяч сто сорок четыре
-    r2 = parse_number_to_word(999999999)
-    print(r1)
-    print(r2)
+    number = parse_word_to_number("сорок один и сто тридцать две тысячных")
+    print(number)  # Ожидается: 41.31
