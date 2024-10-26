@@ -1,7 +1,7 @@
 import re
 import logging
 
-from numbers_dict import parse_number_to_word, parse_word_to_number
+from numbers_parsing import parse_number_to_word, parse_word_to_number
 
 logger = logging.getLogger(__name__)
 

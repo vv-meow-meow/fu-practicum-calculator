@@ -1,5 +1,5 @@
 import pytest
-from numbers_dict import *
+from numbers_parsing import *
 
 
 @pytest.mark.parametrize("input_value, expected_output", [
