@@ -1,8 +1,6 @@
 UNITS: dict[str, int] = {'ноль': 0,
                          'один': 1,
-                         'одна': 1,
                          'два': 2,
-                         'две': 2,
                          'три': 3,
                          'четыре': 4,
                          'пять': 5,
@@ -10,6 +8,9 @@ UNITS: dict[str, int] = {'ноль': 0,
                          'семь': 7,
                          'восемь': 8,
                          'девять': 9}
+
+UNITS_UNIQUE: dict[str, int] = {'одна': 1,
+                                'две': 2}
 
 TEENS: dict[str, int] = {'десять': 10,
                          'одиннадцать': 11,
@@ -106,6 +107,8 @@ def parse_word_to_number(word_num: str) -> int:
             current_number += TENS[word]
         elif word in UNITS:
             current_number += UNITS[word]
+        elif word in UNITS_UNIQUE:
+            current_number += UNITS_UNIQUE[word]
         elif word in ORDERS:
             if current_number == 0:
                 current_number = 1
