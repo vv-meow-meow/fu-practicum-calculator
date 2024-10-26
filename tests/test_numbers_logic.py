@@ -1,6 +1,6 @@
 import pytest
 from numbers_parsing import *
-from numbers_parsing.numbers_logic import parse_fractional_part
+from numbers_parsing.numbers_logic import _parse_fractional_part
 
 
 @pytest.mark.parametrize("input_value, expected_output", [
@@ -133,5 +133,5 @@ def test_parse_number_to_word(input_value, expected_output) -> None:
     (0.9, ['девять', 'десятых']),
 ])
 def test_parse_fractional_part(input_value, expected_output) -> None:
-    result = parse_fractional_part(input_value)
+    result = _parse_fractional_part(input_value)
     assert result == expected_output

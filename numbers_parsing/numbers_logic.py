@@ -27,6 +27,33 @@ def _determine_form(num: int, forms: tuple) -> str:
         return forms[2]
 
 
+def _parse_fractional_part(fractional_number: float) -> list[str]:
+    fractional_number = round(fractional_number, 3)
+    numerator = int(fractional_number * 1000)
+    if numerator == 0: return []
+
+    if numerator % 100 == 0:
+        denominator = 10
+        numerator //= 100
+    elif numerator % 10 == 0:
+        denominator = 100
+        numerator //= 10
+    else:
+        denominator = 1000
+
+    words = []
+    words.extend(parse_number_to_word(numerator, gender="feminine").split())
+
+    if denominator == 10:
+        words.append(_determine_form(numerator, FORMS["denominator_10"]))
+    elif denominator == 100:
+        words.append(_determine_form(numerator, FORMS["denominator_100"]))
+    elif denominator == 1000:
+        words.append(_determine_form(numerator, FORMS["denominator_1000"]))
+
+    return words
+
+
 def parse_word_to_number(word_num: str) -> float:
     """
     Конвертирует строку с числом, записанным словами в число
@@ -87,33 +114,6 @@ def parse_word_to_number(word_num: str) -> float:
 
     result_number = (result_number + current_number + fractional_part) * negative
     return result_number
-
-
-def parse_fractional_part(fractional_number: float) -> list[str]:
-    fractional_number = round(fractional_number, 3)
-    numerator = int(fractional_number * 1000)
-    if numerator == 0: return []
-
-    if numerator % 100 == 0:
-        denominator = 10
-        numerator //= 100
-    elif numerator % 10 == 0:
-        denominator = 100
-        numerator //= 10
-    else:
-        denominator = 1000
-
-    words = []
-    words.extend(parse_number_to_word(numerator, gender="feminine").split())
-
-    if denominator == 10:
-        words.append(_determine_form(numerator, FORMS["denominator_10"]))
-    elif denominator == 100:
-        words.append(_determine_form(numerator, FORMS["denominator_100"]))
-    elif denominator == 1000:
-        words.append(_determine_form(numerator, FORMS["denominator_1000"]))
-
-    return words
 
 
 def parse_number_to_word(number: float,
@@ -236,7 +236,7 @@ def parse_number_to_word(number: float,
 
     if fractional_part > 0:
         result.append("и")
-        result.extend(parse_fractional_part(fractional_part))
+        result.extend(_parse_fractional_part(fractional_part))
 
     return " ".join(result)
 
