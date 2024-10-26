@@ -55,7 +55,11 @@ def _determine_thousand_form(num: int) -> str:
     if num < 0:
         raise ValueError("Negative numbers are not allowed")
 
-    if num % 10 == 1:
+    if 5 <= num % 100 <= 20:
+        return "тысяч"
+    elif num % 10 == 0:
+        return "тысяч"
+    elif num % 10 == 1:
         return "тысяча"
     elif num % 10 < 5:
         return "тысячи"
@@ -67,9 +71,13 @@ def _determine_million_form(num: int) -> str:
     if num < 0:
         raise ValueError("Negative numbers are not allowed")
 
-    if num % 10 == 1:
+    if 5 <= num % 100 <= 20:
+        return "миллионов"
+    elif num % 10 == 0:
+        return "миллионов"
+    elif num % 10 == 1:
         return "миллион"
-    if num % 10 < 5:
+    elif num % 10 < 5:
         return "миллиона"
     else:
         return "миллионов"
