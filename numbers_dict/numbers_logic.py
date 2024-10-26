@@ -131,12 +131,19 @@ def parse_number_to_word(number: int) -> str:
 
     if number == 0: return "ноль"
 
-    def parse_units(unit_number: int) -> list[str]:
+    def parse_units(unit_number: int,
+                    is_thousands: bool = False) -> list[str]:
+        if is_thousands:
+            for word, value in UNITS_UNIQUE.items():
+                if unit_number == value:
+                    return [word]
+
         for word, value in UNITS.items():
             if unit_number == value:
                 return [word]
 
-    def parse_tens(teen_number: int) -> list[str]:
+    def parse_tens(teen_number: int,
+                   is_thousands: bool = False) -> list[str]:
         if teen_number < 20:
             for word, value in TEENS.items():
                 if teen_number == value:
@@ -154,15 +161,13 @@ def parse_number_to_word(number: int) -> str:
                     if tens == value:
                         result.append(word)
                         break
-                for word, value in UNITS.items():
-                    if units == value:
-                        result.append(word)
-                        break
+                result.extend(parse_units(units, is_thousands=is_thousands))
                 return result
         else:
             raise ValueError(f"Число {number} больше 99")
 
-    def parse_hundreds(hundreds_number: int) -> list[str]:
+    def parse_hundreds(hundreds_number: int,
+                       is_thousands: bool = False) -> list[str]:
         result = []
         if hundreds_number < 10:
             for word, value in UNITS.items():
@@ -170,7 +175,7 @@ def parse_number_to_word(number: int) -> str:
                     result.append(word)
                     return result
         elif hundreds_number < 100:
-            result.extend(parse_tens(hundreds_number))
+            result.extend(parse_tens(hundreds_number, is_thousands=is_thousands))
             return result
         elif hundreds_number < 1000:
             hundreds = (hundreds_number // 100) * 100
@@ -182,13 +187,10 @@ def parse_number_to_word(number: int) -> str:
                     break
 
             if tens != 0:
-                result.extend(parse_tens(tens + units))
+                result.extend(parse_tens(tens + units, is_thousands=is_thousands))
             else:
                 if units != 0:
-                    for word, value in UNITS.items():
-                        if units == value:
-                            result.append(word)
-                            break
+                    result.extend(parse_units(units, is_thousands=is_thousands))
             return result
 
     result = []
@@ -211,12 +213,15 @@ def parse_number_to_word(number: int) -> str:
 
         words = []
 
+        is_thousands = False
+        if j == 1: is_thousands = True
+
         if 100 <= group:
-            words.extend(parse_hundreds(group))
+            words.extend(parse_hundreds(group, is_thousands=is_thousands))
         elif 10 <= group <= 99:
-            words.extend(parse_tens(group))
+            words.extend(parse_tens(group, is_thousands=is_thousands))
         elif 0 < group < 10:
-            words.extend(parse_units(group))
+            words.extend(parse_units(group, is_thousands=is_thousands))
 
         if j == 0:
             result.extend(words)
@@ -236,6 +241,6 @@ if __name__ == '__main__':
     print("sup! numbers is __main__")
     r1 = parse_word_to_number(
         "сто пятьдесят два")  # девятьсот двенадцать миллионов шестьсот двадцать пять тысяч сто сорок четыре
-    r2 = parse_number_to_word(105_104_421)
+    r2 = parse_number_to_word(999999999)
     print(r1)
     print(r2)
