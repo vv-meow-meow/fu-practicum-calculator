@@ -30,6 +30,10 @@ def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")) -
             if parse_word_to_number(equation[2]) == 0:
                 return "Ошибка: деление на ноль"
             result_number = parse_word_to_number(equation[0]) / parse_word_to_number(equation[2])
+        case "остаток от деления на":
+            result_number = parse_word_to_number(equation[0]) % parse_word_to_number(equation[2])
+        case "процент":
+            result_number = parse_word_to_number(equation[0]) % parse_word_to_number(equation[2])
         case _:
             return "Ошибка: Неизвестная операция"
 
@@ -43,7 +47,7 @@ def check_equation_string(equation: str) -> list | bool:
     :param equation: string of the equation
     :return: list of valid equation / False if equation string is invalid
     """
-    equation = re.split(r'(плюс|минус|умножить на|разделить на)', equation)
+    equation = re.split(r'(плюс|минус|умножить на|разделить на|процент|остаток от деления на)', equation)
     equation = [element.strip() for element in equation]
     if len(equation) == 3:
         flag = True
