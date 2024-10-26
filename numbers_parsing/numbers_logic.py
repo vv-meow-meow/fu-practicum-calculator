@@ -62,8 +62,6 @@ def parse_word_to_number(word_num: str) -> float:
             current_number += TENS[word]
         elif word in UNITS:
             current_number += UNITS[word]
-        elif word in UNITS_UNIQUE:
-            current_number += UNITS_UNIQUE[word]
         elif word in ORDERS:
             if current_number == 0:
                 current_number = 1
