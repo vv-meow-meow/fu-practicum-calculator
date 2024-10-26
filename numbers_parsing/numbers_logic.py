@@ -6,84 +6,25 @@ from numbers_parsing.numbers_dict import *
 logger = logging.getLogger(__name__)
 
 
-def _determine_thousand_form(num: int) -> str:
+def _determine_form(num: int, forms: tuple) -> str:
+    """
+    Определяет правильную форму слова в зависимости от числа.
+
+    :param num: Число для определения формы
+    :param forms: Кортеж из трех форм слова (1, 2-4, 5-0)
+    :return: Правильная форма слова
+    """
     if num < 0:
         raise ValueError("Negative numbers are not allowed")
 
-    if 5 <= num % 100 <= 20:
-        return "тысяч"
-    elif num % 10 == 0:
-        return "тысяч"
+    if 11 <= num % 100 <= 14:
+        return forms[2]
     elif num % 10 == 1:
-        return "тысяча"
-    elif num % 10 < 5:
-        return "тысячи"
+        return forms[0]
+    elif 2 <= num % 10 <= 4:
+        return forms[1]
     else:
-        return "тысяч"
-
-
-def _determine_million_form(num: int) -> str:
-    if num < 0:
-        raise ValueError("Negative numbers are not allowed")
-
-    if 5 <= num % 100 <= 20:
-        return "миллионов"
-    elif num % 10 == 0:
-        return "миллионов"
-    elif num % 10 == 1:
-        return "миллион"
-    elif num % 10 < 5:
-        return "миллиона"
-    else:
-        return "миллионов"
-
-
-def _determine_denominator_10_form(num: int) -> str:
-    if num < 0:
-        raise ValueError("Negative numbers are not allowed")
-
-    if 5 <= num % 100 <= 20:
-        return "десятых"
-    elif num % 10 == 0:
-        return "десятых"
-    elif num % 10 == 1:
-        return "десятая"
-    elif num % 10 < 5:
-        return "десятых"
-    else:
-        return "десятых"
-
-
-def _determine_denominator_100_form(num: int) -> str:
-    if num < 0:
-        raise ValueError("Negative numbers are not allowed")
-
-    if 5 <= num % 100 <= 20:
-        return "сотых"
-    elif num % 10 == 0:
-        return "сотых"
-    elif num % 10 == 1:
-        return "сотая"
-    elif num % 10 < 5:
-        return "сотых"
-    else:
-        return "сотых"
-
-
-def _determine_denominator_1000_form(num: int) -> str:
-    if num < 0:
-        raise ValueError("Negative numbers are not allowed")
-
-    if 5 <= num % 100 <= 20:
-        return "тысячных"
-    elif num % 10 == 0:
-        return "тысячных"
-    elif num % 10 == 1:
-        return "тысячная"
-    elif num % 10 < 5:
-        return "тысячных"
-    else:
-        return "тысячных"
+        return forms[2]
 
 
 def parse_word_to_number(word_num: str) -> float:
@@ -168,11 +109,11 @@ def parse_fractional_part(fractional_number: float) -> list[str]:
     words.extend(parse_number_to_word(numerator, gender="feminine").split())
 
     if denominator == 10:
-        words.append(_determine_denominator_10_form(numerator))
+        words.append(_determine_form(numerator, FORMS["denominator_10"]))
     elif denominator == 100:
-        words.append(_determine_denominator_100_form(numerator))
+        words.append(_determine_form(numerator, FORMS["denominator_100"]))
     elif denominator == 1000:
-        words.append(_determine_denominator_1000_form(numerator))
+        words.append(_determine_form(numerator, FORMS["denominator_1000"]))
 
     return words
 
@@ -299,11 +240,11 @@ def parse_number_to_word(number: float,
             result.extend(words)
         elif j == 1:
             result.extend(words)
-            result.append(_determine_thousand_form(group))
+            result.append(_determine_form(group, FORMS["thousand"]))
             if empty_flag: gender = "masculine"
         elif j == 2:
             result.extend(words)
-            result.append(_determine_million_form(group))
+            result.append(_determine_form(group, FORMS["million"]))
         else:
             raise ValueError(f"Number {number} is too big (function support numbers up to million)")
 
