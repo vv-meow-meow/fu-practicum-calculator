@@ -116,6 +116,8 @@ def parse_number_to_word(number: int) -> str:
     :return: строка с числом, записанным словами
     """
 
+    if number == 0: return "ноль"
+
     def parse_units(unit_number: int) -> list[str]:
         for word, value in UNITS.items():
             if unit_number == value:
