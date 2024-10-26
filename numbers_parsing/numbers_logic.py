@@ -315,5 +315,8 @@ def parse_number_to_word(number: float,
 
 
 if __name__ == '__main__':
+    print(f"!!! numbers_logic is main !!!")
     text = parse_number_to_word(1002)
-    print(text)  # Ожидается: "сорок один и сорок три тысячных"
+    print(text)
+    number = parse_word_to_number("пятьдесят два")
+    print(number)
