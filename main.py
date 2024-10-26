@@ -4,7 +4,12 @@ import logging
 from numbers_dict import parse_number_to_word, parse_word_to_number
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[{asctime}] #{levelname:8} {filename}:{lineno} - {name} - {message}',
+    style='{'
+)
 
 
 def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")) -> str:

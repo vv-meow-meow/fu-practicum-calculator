@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 UNITS: dict[str, int] = {'ноль': 0,
                          'один': 1,
                          'два': 2,
@@ -128,7 +132,7 @@ def parse_number_to_word(number: int) -> str:
     :param number: число
     :return: строка с числом, записанным словами
     """
-
+    logger.debug(f"Getting number {number}")
     if number == 0: return "ноль"
 
     def parse_units(unit_number: int,
