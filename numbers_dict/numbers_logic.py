@@ -194,16 +194,16 @@ def parse_number_to_word(number: int) -> str:
         enum_group: tuple[int, int] = enumerated_groups[i]
         j = enum_group[0]
         group = enum_group[1]
+        if group == 0: continue
 
         words = []
 
-        hundreds = (group // 100) * 100
-        tens_units = group % 100
-
-        if hundreds > 0:
+        if 100 <= group:
             words.extend(parse_hundreds(group))
-        elif 0 < tens_units < 10:
-            words.extend(parse_units(tens_units))
+        elif 10 <= group <= 99:
+            words.extend(parse_tens(group))
+        elif 0 < group < 10:
+            words.extend(parse_units(group))
 
         if j == 0:
             result.extend(words)
