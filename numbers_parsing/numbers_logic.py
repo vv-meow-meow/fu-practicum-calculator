@@ -1,4 +1,5 @@
 import logging
+from typing import Literal
 
 from numbers_parsing.numbers_dict import *
 
@@ -37,6 +38,54 @@ def _determine_million_form(num: int) -> str:
         return "миллионов"
 
 
+def _determine_denominator_10_form(num: int) -> str:
+    if num < 0:
+        raise ValueError("Negative numbers are not allowed")
+
+    if 5 <= num % 100 <= 20:
+        return "десятых"
+    elif num % 10 == 0:
+        return "десятых"
+    elif num % 10 == 1:
+        return "десятая"
+    elif num % 10 < 5:
+        return "десятых"
+    else:
+        return "десятых"
+
+
+def _determine_denominator_100_form(num: int) -> str:
+    if num < 0:
+        raise ValueError("Negative numbers are not allowed")
+
+    if 5 <= num % 100 <= 20:
+        return "сотых"
+    elif num % 10 == 0:
+        return "сотых"
+    elif num % 10 == 1:
+        return "сотая"
+    elif num % 10 < 5:
+        return "сотых"
+    else:
+        return "сотых"
+
+
+def _determine_denominator_1000_form(num: int) -> str:
+    if num < 0:
+        raise ValueError("Negative numbers are not allowed")
+
+    if 5 <= num % 100 <= 20:
+        return "тысячных"
+    elif num % 10 == 0:
+        return "тысячных"
+    elif num % 10 == 1:
+        return "тысячная"
+    elif num % 10 < 5:
+        return "тысячных"
+    else:
+        return "тысячных"
+
+
 def parse_word_to_number(word_num: str) -> float:
     """
     Конвертирует строку с числом, записанным словами в число
@@ -50,8 +99,12 @@ def parse_word_to_number(word_num: str) -> float:
         integer_part_words = words[:index]
         fractional_part_words = words[index + 1:]
     else:
-        integer_part_words = words
-        fractional_part_words = []
+        if words[-1] in FRACTION_DENOMINATORS:
+            integer_part_words = ["ноль"]
+            fractional_part_words = words
+        else:
+            integer_part_words = words
+            fractional_part_words = []
 
     result_number = 0
     current_number = 0
@@ -97,28 +150,63 @@ def parse_word_to_number(word_num: str) -> float:
     return result_number
 
 
-def parse_number_to_word(number: int) -> str:
+def parse_fractional_part(fractional_number: float) -> list[str]:
+    fractional_number = round(fractional_number, 3)
+    numerator = int(fractional_number * 1000)
+    if numerator == 0: return []
+
+    if numerator % 100 == 0:
+        denominator = 10
+        numerator //= 100
+    elif numerator % 10 == 0:
+        denominator = 100
+        numerator //= 10
+    else:
+        denominator = 1000
+
+    words = []
+    words.extend(parse_number_to_word(numerator, gender="feminine").split())
+
+    if denominator == 10:
+        words.append(_determine_denominator_10_form(numerator))
+    elif denominator == 100:
+        words.append(_determine_denominator_100_form(numerator))
+    elif denominator == 1000:
+        words.append(_determine_denominator_1000_form(numerator))
+
+    return words
+
+
+def parse_number_to_word(number: float,
+                         gender: Literal["masculine", "feminine"] = None) -> str:
     """
     Конвертирует число в строку, записанную словами
     :param number: число
+    :param gender: род числа (мужской или женский)
     :return: строка с числом, записанным словами
     """
     logger.debug(f"Getting number {number}")
     if number == 0: return "ноль"
 
     def parse_units(unit_number: int,
-                    is_thousands: bool = False) -> list[str]:
-        if is_thousands:
-            for word, value in UNITS_UNIQUE.items():
-                if unit_number == value:
-                    return [word]
+                    gender: Literal["masculine", "feminine"] = "masculine") -> list[str]:
 
-        for word, value in UNITS.items():
-            if unit_number == value:
-                return [word]
+        units_gender = {
+            1: {"masculine": "один", "feminine": "одна"},
+            2: {"masculine": "два", "feminine": "две"},
+            3: {"masculine": "три", "feminine": "три"},
+            4: {"masculine": "четыре", "feminine": "четыре"},
+            5: {"masculine": "пять", "feminine": "пять"},
+            6: {"masculine": "шесть", "feminine": "шесть"},
+            7: {"masculine": "семь", "feminine": "семь"},
+            8: {"masculine": "восемь", "feminine": "восемь"},
+            9: {"masculine": "девять", "feminine": "девять"}
+        }
+
+        return [units_gender[unit_number][gender]]
 
     def parse_tens(teen_number: int,
-                   is_thousands: bool = False) -> list[str]:
+                   gender: Literal["masculine", "feminine"] = "masculine") -> list[str]:
         if teen_number < 20:
             for word, value in TEENS.items():
                 if teen_number == value:
@@ -136,13 +224,13 @@ def parse_number_to_word(number: int) -> str:
                     if tens == value:
                         result.append(word)
                         break
-                result.extend(parse_units(units, is_thousands=is_thousands))
+                result.extend(parse_units(units, gender=gender))
                 return result
         else:
             raise ValueError(f"Число {number} больше 99")
 
     def parse_hundreds(hundreds_number: int,
-                       is_thousands: bool = False) -> list[str]:
+                       gender: Literal["masculine", "feminine"] = "masculine") -> list[str]:
         result = []
         if hundreds_number < 10:
             for word, value in UNITS.items():
@@ -150,7 +238,7 @@ def parse_number_to_word(number: int) -> str:
                     result.append(word)
                     return result
         elif hundreds_number < 100:
-            result.extend(parse_tens(hundreds_number, is_thousands=is_thousands))
+            result.extend(parse_tens(hundreds_number, gender=gender))
             return result
         elif hundreds_number < 1000:
             hundreds = (hundreds_number // 100) * 100
@@ -162,10 +250,10 @@ def parse_number_to_word(number: int) -> str:
                     break
 
             if tens != 0:
-                result.extend(parse_tens(tens + units, is_thousands=is_thousands))
+                result.extend(parse_tens(tens + units, gender=gender))
             else:
                 if units != 0:
-                    result.extend(parse_units(units, is_thousands=is_thousands))
+                    result.extend(parse_units(units, gender=gender))
             return result
 
     result = []
@@ -173,10 +261,15 @@ def parse_number_to_word(number: int) -> str:
         result.append("минус")
         number = abs(number)
 
+    integer_part = int(number)
+    fractional_part = number - integer_part
+
+    if integer_part == 0: result.append("ноль")
+
     groups: list[int] = []
-    while number > 0:
-        groups.append(number % 1000)
-        number //= 1000
+    while integer_part > 0:
+        groups.append(integer_part % 1000)
+        integer_part //= 1000
 
     enumerated_groups = tuple(enumerate(groups))
 
@@ -188,15 +281,17 @@ def parse_number_to_word(number: int) -> str:
 
         words = []
 
-        is_thousands = False
-        if j == 1: is_thousands = True
+        if gender is None:
+            gender: Literal["masculine", "feminine"] = "masculine"
+
+        if j == 1: gender = "feminine"
 
         if 100 <= group:
-            words.extend(parse_hundreds(group, is_thousands=is_thousands))
+            words.extend(parse_hundreds(group, gender=gender))
         elif 10 <= group <= 99:
-            words.extend(parse_tens(group, is_thousands=is_thousands))
+            words.extend(parse_tens(group, gender=gender))
         elif 0 < group < 10:
-            words.extend(parse_units(group, is_thousands=is_thousands))
+            words.extend(parse_units(group, gender=gender))
 
         if j == 0:
             result.extend(words)
@@ -209,9 +304,13 @@ def parse_number_to_word(number: int) -> str:
         else:
             raise ValueError(f"Number {number} is too big (function support numbers up to million)")
 
+    if fractional_part > 0:
+        result.append("и")
+        result.extend(parse_fractional_part(fractional_part))
+
     return " ".join(result)
 
 
 if __name__ == '__main__':
-    number = parse_word_to_number("сорок один и сто тридцать две тысячных")
-    print(number)  # Ожидается: 41.31
+    text = parse_word_to_number("три сотых")
+    print(text)  # Ожидается: "сорок один и сорок три тысячных"
