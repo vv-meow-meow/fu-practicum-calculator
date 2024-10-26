@@ -11,6 +11,27 @@ UNITS: dict[str, int] = {'ноль': 0,
                          'восемь': 8,
                          'девять': 9}
 
+UNITS_GENDER: dict[int, dict[str, str]] = {
+    1: {"masculine": "один",
+        "feminine": "одна"},
+    2: {"masculine": "два",
+        "feminine": "две"},
+    3: {"masculine": "три",
+        "feminine": "три"},
+    4: {"masculine": "четыре",
+        "feminine": "четыре"},
+    5: {"masculine": "пять",
+        "feminine": "пять"},
+    6: {"masculine": "шесть",
+        "feminine": "шесть"},
+    7: {"masculine": "семь",
+        "feminine": "семь"},
+    8: {"masculine": "восемь",
+        "feminine": "восемь"},
+    9: {"masculine": "девять",
+        "feminine": "девять"}
+}
+
 TEENS: dict[str, int] = {'десять': 10,
                          'одиннадцать': 11,
                          'двенадцать': 12,
@@ -55,7 +76,7 @@ FRACTION_DENOMINATORS: dict[str, int] = {'десятая': 10,
                                          'тысячная': 1000,
                                          'тысячных': 1000}
 
-FORMS = {
+FORMS: dict[str, tuple] = {
     'thousand': ('тысяча', 'тысячи', 'тысяч'),
     'million': ('миллион', 'миллиона', 'миллионов'),
     'denominator_10': ('десятая', 'десятых', 'десятых'),

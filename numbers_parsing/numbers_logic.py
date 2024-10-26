@@ -130,19 +130,7 @@ def parse_number_to_word(number: float,
     def parse_units(unit_number: int,
                     gender: Literal["masculine", "feminine"] = "masculine") -> list[str]:
 
-        units_gender = {
-            1: {"masculine": "один", "feminine": "одна"},
-            2: {"masculine": "два", "feminine": "две"},
-            3: {"masculine": "три", "feminine": "три"},
-            4: {"masculine": "четыре", "feminine": "четыре"},
-            5: {"masculine": "пять", "feminine": "пять"},
-            6: {"masculine": "шесть", "feminine": "шесть"},
-            7: {"masculine": "семь", "feminine": "семь"},
-            8: {"masculine": "восемь", "feminine": "восемь"},
-            9: {"masculine": "девять", "feminine": "девять"}
-        }
-
-        return [units_gender[unit_number][gender]]
+        return [UNITS_GENDER[unit_number][gender]]
 
     def parse_tens(teen_number: int,
                    gender: Literal["masculine", "feminine"] = "masculine") -> list[str]:
