@@ -273,6 +273,11 @@ def parse_number_to_word(number: float,
 
     enumerated_groups = tuple(enumerate(groups))
 
+    empty_flag = False
+    if gender is None:
+        gender: Literal["masculine", "feminine"] = "masculine"
+        empty_flag = True
+
     for i in range(len(enumerated_groups) - 1, 0 - 1, -1):
         enum_group: tuple[int, int] = enumerated_groups[i]
         j = enum_group[0]
@@ -280,9 +285,6 @@ def parse_number_to_word(number: float,
         if group == 0: continue
 
         words = []
-
-        if gender is None:
-            gender: Literal["masculine", "feminine"] = "masculine"
 
         if j == 1: gender = "feminine"
 
@@ -298,6 +300,7 @@ def parse_number_to_word(number: float,
         elif j == 1:
             result.extend(words)
             result.append(_determine_thousand_form(group))
+            if empty_flag: gender = "masculine"
         elif j == 2:
             result.extend(words)
             result.append(_determine_million_form(group))
@@ -312,5 +315,5 @@ def parse_number_to_word(number: float,
 
 
 if __name__ == '__main__':
-    text = parse_word_to_number("три сотых")
+    text = parse_number_to_word(1002)
     print(text)  # Ожидается: "сорок один и сорок три тысячных"
