@@ -41,7 +41,12 @@ def check_equation_string(equation: str) -> list | bool:
     equation = re.split(r'(плюс|минус|умножить на|разделить на)', equation)
     equation = [element.strip() for element in equation]
     if len(equation) == 3:
-        return equation
+        flag = True
+        for element in equation:
+            if not element:
+                flag = False
+        if flag:
+            return equation
     return False
 
 
