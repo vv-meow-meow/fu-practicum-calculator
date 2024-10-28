@@ -6,7 +6,7 @@ from numbers_parsing import parse_number_to_word, parse_word_to_number
 logger = logging.getLogger(__name__)
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.CRITICAL,
     format='[{asctime}] #{levelname:8} {filename}:{lineno} - {name} - {message}',
     style='{'
 )
@@ -89,4 +89,8 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        logger.exception(e)
+        print("Произошла непредвиденная ошибка. Перезапустите программу.")
