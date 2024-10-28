@@ -28,28 +28,23 @@ def _determine_form(num: int, forms: tuple) -> str:
 
 
 def _parse_fractional_part(fractional_number: float) -> list[str]:
-    fractional_number = round(fractional_number, 3)
-    numerator = int(fractional_number * 1000)
+    fractional_number = round(fractional_number, 6)
+    numerator = int(fractional_number * 1_000_000)
     if numerator == 0: return []
 
-    if numerator % 100 == 0:
-        denominator = 10
-        numerator //= 100
-    elif numerator % 10 == 0:
-        denominator = 100
-        numerator //= 10
+    denominators = (10, 100, 1_000, 10_000, 100_000, 1_000_000)
+    for denom in denominators:
+        if numerator % (1_000_000 // denom) == 0:
+            denominator = denom
+            numerator = numerator // (1_000_000 // denom)
+            break
     else:
-        denominator = 1000
+        denominator = 1_000_000
 
     words = []
     words.extend(parse_number_to_word(numerator, gender="feminine").split())
-
-    if denominator == 10:
-        words.append(_determine_form(numerator, FORMS["denominator_10"]))
-    elif denominator == 100:
-        words.append(_determine_form(numerator, FORMS["denominator_100"]))
-    elif denominator == 1000:
-        words.append(_determine_form(numerator, FORMS["denominator_1000"]))
+    denom_key = f"denominator_{denominator}"
+    words.append(_determine_form(numerator, FORMS[denom_key]))
 
     return words
 
