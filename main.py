@@ -19,25 +19,39 @@ def parse_and_calculate(equation: list = ("ноль", "плюс", "ноль")) -
     :return: result of calculation
     """
     logger.debug(equation)
+    left_number = parse_word_to_number(equation[0])
+    right_number = parse_word_to_number(equation[2])
+    numerator, denominator = None, None
+
     match equation[1]:
         case "плюс":
-            result_number = parse_word_to_number(equation[0]) + parse_word_to_number(equation[2])
+            result_number = left_number + right_number
         case "минус":
-            result_number = parse_word_to_number(equation[0]) - parse_word_to_number(equation[2])
+            result_number = left_number - right_number
         case "умножить на":
-            result_number = parse_word_to_number(equation[0]) * parse_word_to_number(equation[2])
+            result_number = left_number * right_number
         case "разделить на":
-            if parse_word_to_number(equation[2]) == 0:
+            if right_number == 0:
                 return "Ошибка: деление на ноль"
-            result_number = parse_word_to_number(equation[0]) / parse_word_to_number(equation[2])
+            result_number = left_number / right_number
+            numerator = result_number.numerator
+            denominator = result_number.denominator
         case "остаток от деления на":
-            result_number = parse_word_to_number(equation[0]) % parse_word_to_number(equation[2])
+            if right_number == 0:
+                return "Ошибка: деление на ноль"
+            result_number = left_number % right_number
         case "процент":
-            result_number = parse_word_to_number(equation[0]) % parse_word_to_number(equation[2])
+            if right_number == 0:
+                return "Ошибка: деление на ноль"
+            result_number = left_number % right_number
         case _:
             return "Ошибка: Неизвестная операция"
 
-    result = parse_number_to_word(result_number)
+    if numerator and denominator:
+        result = parse_number_to_word(number=float(result_number), numerator=numerator, denominator=denominator)
+    else:
+        result = parse_number_to_word(number=float(result_number))
+
     return result
 
 

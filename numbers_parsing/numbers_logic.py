@@ -1,5 +1,6 @@
 import logging
 from typing import Literal
+from fractions import Fraction
 
 from numbers_parsing.numbers_dict import *
 
@@ -27,6 +28,34 @@ def _determine_form(num: int, forms: tuple) -> str:
         return forms[2]
 
 
+def get_periodic_part(numerator: int, denominator: int) -> tuple[str, str]:
+    """
+    Определяет периодическую и непериодическую части дроби.
+    :param numerator: Числитель дробной части.
+    :param denominator: Знаменатель дробной части.
+    :return: Кортеж (непериодическая часть, периодическая часть).
+    """
+    remainders = {}
+    decimal_digits = ''
+    remainder = numerator % denominator
+    position = 0
+
+    while remainder != 0 and position < 1000:
+        if remainder in remainders:
+            start = remainders[remainder]
+            non_periodic = decimal_digits[:start]
+            periodic = decimal_digits[start:]
+            return non_periodic, periodic[:4]
+        remainders[remainder] = position
+        remainder *= 10
+        digit = remainder // denominator
+        decimal_digits += str(digit)
+        remainder %= denominator
+        position += 1
+
+    return decimal_digits, ''
+
+
 def _parse_fractional_part(fractional_number: float) -> list[str]:
     fractional_number = round(fractional_number, 6)
     numerator = int(fractional_number * 1_000_000)
@@ -49,82 +78,17 @@ def _parse_fractional_part(fractional_number: float) -> list[str]:
     return words
 
 
-def parse_word_to_number(word_num: str) -> float:
+def parse_integer_part(integer_part: int,
+                       gender: Literal["feminine", "masculine"] = None) -> list[str]:
     """
-    Конвертирует строку с числом, записанным словами в число
-    :param word_num: число, записанное словами
-    :return: Целое число
-    """
-    words: list[str] = word_num.lower().split()
-
-    if "и" in words:
-        index = words.index("и")
-        integer_part_words = words[:index]
-        fractional_part_words = words[index + 1:]
-    else:
-        if words[-1] in FRACTION_DENOMINATORS:
-            integer_part_words = ["ноль"]
-            fractional_part_words = words
-        else:
-            integer_part_words = words
-            fractional_part_words = []
-
-    result_number = 0
-    current_number = 0
-    fractional_part = 0.0
-    negative = 1
-    for word in integer_part_words:
-        if word == "минус":
-            negative = -1
-        elif word in HUNDREDS:
-            current_number += HUNDREDS[word]
-        elif word in TEENS:
-            current_number += TEENS[word]
-        elif word in TENS:
-            current_number += TENS[word]
-        elif word in UNITS:
-            current_number += UNITS[word]
-        elif word in ORDERS:
-            if current_number == 0:
-                current_number = 1
-            result_number += current_number * ORDERS[word]
-            current_number = 0
-        else:
-            raise ValueError(f'Word "{word}" is not a valid number')
-
-    if fractional_part_words:
-        numerator_words = []
-        denominator = None
-
-        for i, word in enumerate(fractional_part_words):
-            if word in FRACTION_DENOMINATORS:
-                denominator = FRACTION_DENOMINATORS[word]
-                numerator_words = fractional_part_words[:i]
-                break
-
-        if denominator and numerator_words:
-            numerator_str = ' '.join(numerator_words)
-            numerator = parse_word_to_number(numerator_str)
-            fractional_part = numerator / denominator
-
-    result_number = (result_number + current_number + fractional_part) * negative
-    return result_number
-
-
-def parse_number_to_word(number: float,
-                         gender: Literal["masculine", "feminine"] = None) -> str:
-    """
-    Конвертирует число в строку, записанную словами
-    :param number: число
+    Преобразует целую часть числа в слова.
+    :param integer_part: целая часть числа
     :param gender: род числа (мужской или женский)
-    :return: строка с числом, записанным словами
+    :return: список слов, представляющих число
     """
-    logger.debug(f"Getting number {number}")
-    if number == 0: return "ноль"
 
     def parse_units(unit_number: int,
                     gender: Literal["masculine", "feminine"] = "masculine") -> list[str]:
-
         return [UNITS_GENDER[unit_number][gender]]
 
     def parse_tens(teen_number: int,
@@ -155,10 +119,7 @@ def parse_number_to_word(number: float,
                        gender: Literal["masculine", "feminine"] = "masculine") -> list[str]:
         result = []
         if hundreds_number < 10:
-            for word, value in UNITS.items():
-                if hundreds_number == value:
-                    result.append(word)
-                    return result
+            return parse_units(hundreds_number, gender=gender)
         elif hundreds_number < 100:
             result.extend(parse_tens(hundreds_number, gender=gender))
             return result
@@ -179,66 +140,200 @@ def parse_number_to_word(number: float,
             return result
 
     result = []
-    if number < 0:
-        result.append("минус")
-        number = abs(number)
-
-    integer_part = int(number)
-    fractional_part = number - integer_part
-
-    if integer_part == 0: result.append("ноль")
-
-    groups: list[int] = []
+    groups = []
     while integer_part > 0:
         groups.append(integer_part % 1000)
         integer_part //= 1000
 
-    enumerated_groups = tuple(enumerate(groups))
+    default_gender = gender or "masculine"
 
-    empty_flag = False
-    if gender is None:
-        gender: Literal["masculine", "feminine"] = "masculine"
-        empty_flag = True
-
-    for i in range(len(enumerated_groups) - 1, 0 - 1, -1):
-        enum_group: tuple[int, int] = enumerated_groups[i]
-        j = enum_group[0]
-        group = enum_group[1]
+    for i in range(len(groups) - 1, -1, -1):
+        group = groups[i]
         if group == 0: continue
 
-        words = []
+        group_words = []
 
-        if j == 1: gender = "feminine"
-
-        if 100 <= group:
-            words.extend(parse_hundreds(group, gender=gender))
-        elif 10 <= group <= 99:
-            words.extend(parse_tens(group, gender=gender))
-        elif 0 < group < 10:
-            words.extend(parse_units(group, gender=gender))
-
-        if j == 0:
-            result.extend(words)
-        elif j == 1:
-            result.extend(words)
-            result.append(_determine_form(group, FORMS["thousand"]))
-            if empty_flag: gender = "masculine"
-        elif j == 2:
-            result.extend(words)
-            result.append(_determine_form(group, FORMS["million"]))
+        if i == 1:
+            group_gender = "feminine"
         else:
-            raise ValueError(f"Number {number} is too big (function support numbers up to million)")
+            group_gender = default_gender
 
-    if fractional_part > 0:
-        result.append("и")
-        result.extend(_parse_fractional_part(fractional_part))
+        group_words.extend(parse_hundreds(group, gender=group_gender))
+
+        if i == 1:
+            group_words.append(_determine_form(group, FORMS["thousand"]))
+        elif i == 2:
+            group_words.append(_determine_form(group, FORMS["million"]))
+
+        result.extend(group_words)
+
+    return result
+
+
+def parse_number_to_word(number: float,
+                         numerator: int = None,
+                         denominator: int = None,
+                         gender: Literal["masculine", "feminine"] = None) -> str:
+    """
+    Конвертирует число в строку, записанную словами.
+    :param number: число
+    :param numerator: числитель дробной части (если есть)
+    :param denominator: знаменатель дробной части (если есть)
+    :param gender: род числа (мужской или женский)
+    :return: строка с числом, записанным словами
+    """
+    logger.debug(f"Getting number {number}")
+    if number == 0: return "ноль"
+
+    result = []
+    if number < 0:
+        result.append("минус")
+        number = abs(number)
+
+    if numerator: numerator = abs(numerator)
+
+    integer_part = int(number)
+    fractional_part = number - integer_part
+
+    if integer_part == 0:
+        result.append("ноль")
+    else:
+        integer_words = parse_integer_part(integer_part, gender)
+        result.extend(integer_words)
+
+    if fractional_part > 0 or (numerator and denominator):
+
+        if numerator and denominator:
+            non_periodic, periodic = get_periodic_part(numerator, denominator)
+
+            if non_periodic:
+                result.append("и")
+                fractional_words = []
+                digit_word = parse_integer_part(int(non_periodic), gender="feminine")
+                fractional_words.extend(digit_word)
+                denom_key = f"denominator_{10 ** len(non_periodic)}"
+                if denom_key in FORMS:
+                    fractional_words.append(_determine_form(int(non_periodic), FORMS[denom_key]))
+                else:
+                    fractional_words.append(f"делить на {parse_number_to_word(10 ** len(non_periodic))}")
+                result.extend(fractional_words)
+
+            if periodic:
+                period_words = []
+                for digit in periodic:
+                    digit_word = parse_number_to_word(int(digit), gender="masculine")
+                    period_words.append(digit_word)
+                result.append("и")
+                result.extend(period_words)
+                result.append("в периоде")
+        else:
+            frac = Fraction(fractional_part).limit_denominator(1_000_000)
+            numerator = frac.numerator
+            denominator = frac.denominator
+
+            non_periodic, periodic = get_periodic_part(numerator, denominator)
+
+            if non_periodic:
+                result.append("и")
+                fractional_words = []
+                digit_word = parse_number_to_word(int(non_periodic), gender="feminine")
+                fractional_words.append(digit_word)
+                denom_key = f"denominator_{10 ** len(non_periodic)}"
+                if denom_key in FORMS:
+                    fractional_words.append(_determine_form(int(non_periodic), FORMS[denom_key]))
+                else:
+                    fractional_words.append(f"делить на {parse_number_to_word(10 ** len(non_periodic))}")
+                result.extend(fractional_words)
+
+            if periodic:
+                period_words = []
+                for digit in periodic:
+                    digit_word = parse_number_to_word(int(digit), gender="feminine")
+                    period_words.append(digit_word)
+                result.append("и ноль")
+                result.extend(period_words)
+                result.append("в периоде")
 
     return " ".join(result)
 
 
+def parse_word_to_number(word_num: str) -> Fraction:
+    """
+    Конвертирует строку с числом, записанным словами в число
+    :param word_num: число, записанное словами
+    :return: Целое число
+    """
+    words: list[str] = word_num.lower().split()
+
+    if "и" in words:
+        index = words.index("и")
+        integer_part_words = words[:index]
+        fractional_part_words = words[index + 1:]
+    else:
+        if words[-1] in FRACTION_DENOMINATORS:
+            integer_part_words = ["ноль"]
+            fractional_part_words = words
+        else:
+            integer_part_words = words
+            fractional_part_words = []
+
+    result_number = Fraction(0)
+    current_number = 0
+    fractional_part = Fraction(0)
+    negative = 1
+    for word in integer_part_words:
+        if word == "минус":
+            negative = -1
+        elif word in HUNDREDS:
+            current_number += HUNDREDS[word]
+        elif word in TEENS:
+            current_number += TEENS[word]
+        elif word in TENS:
+            current_number += TENS[word]
+        elif word in UNITS:
+            current_number += UNITS[word]
+        elif word in ORDERS:
+            if current_number == 0:
+                current_number = 1
+            result_number += current_number * ORDERS[word]
+            current_number = 0
+        else:
+            raise ValueError(f'Word "{word}" is not a valid number')
+
+    result_number += current_number
+
+    # Парсинг дробной части
+    if fractional_part_words:
+        numerator_words = []
+        denominator = None
+
+        for i, word in enumerate(fractional_part_words):
+            if word in FRACTION_DENOMINATORS:
+                denominator = FRACTION_DENOMINATORS[word]
+                numerator_words = fractional_part_words[:i]
+                break
+
+        if denominator and numerator_words:
+            numerator_str = ' '.join(numerator_words)
+            numerator = int(parse_word_to_number(numerator_str))
+            fractional_part = Fraction(numerator, denominator)
+        else:
+            raise ValueError("Invalid fractional part")
+
+    result_number += fractional_part
+    result_number *= negative
+
+    return result_number
+
+
 if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='[{asctime}] #{levelname:8} {filename}:{lineno} - {name} - {message}',
+        style='{'
+    )
     print(f"!!! numbers_logic is main !!!")
-    text = parse_number_to_word(1002)
+    text = parse_number_to_word(1002.22222222)
     print(text)
-    number = parse_word_to_number("пятьдесят два")
-    print(number)
+    number = parse_word_to_number("девятнадцать и восемьдесят две сотых")
+    print(number.numerator, number.denominator)  # Вывод: Fraction(1982, 100)
