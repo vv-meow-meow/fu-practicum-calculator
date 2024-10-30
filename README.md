@@ -15,7 +15,9 @@
 
 ## Демонстрация калькулятора
 
-https://youtu.be/HD_1ecQT-qg
+- https://youtu.be/HD_1ecQT-qg
+
+<img src="images/calculator-example.png" width="500" alt="calculator-example">
 
 ## Задание
 
