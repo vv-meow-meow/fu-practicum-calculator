@@ -31,9 +31,10 @@ def _determine_form(num: int, forms: tuple) -> str:
 def get_periodic_part(numerator: int, denominator: int) -> tuple[str, str]:
     """
     Определяет периодическую и непериодическую части дроби.
-    :param numerator: Числитель дробной части.
-    :param denominator: Знаменатель дробной части.
-    :return: Кортеж (непериодическая часть, периодическая часть).
+
+    :param numerator: Числитель дробной части
+    :param denominator: Знаменатель дробной части
+    :return: Кортеж, содержащий непериодическую и периодическую части
     """
     remainders = {}
     decimal_digits = ''
@@ -57,6 +58,12 @@ def get_periodic_part(numerator: int, denominator: int) -> tuple[str, str]:
 
 
 def _parse_fractional_part(fractional_number: float) -> list[str]:
+    """
+    Преобразует дробную часть числа в слова.
+
+    :param fractional_number: Дробная часть числа
+    :return: Список слов, представляющих дробную часть числа
+    """
     fractional_number = round(fractional_number, 6)
     numerator = int(fractional_number * 1_000_000)
     if numerator == 0: return []
@@ -82,9 +89,10 @@ def parse_integer_part(integer_part: int,
                        gender: Literal["feminine", "masculine"] = None) -> list[str]:
     """
     Преобразует целую часть числа в слова.
-    :param integer_part: целая часть числа
-    :param gender: род числа (мужской или женский)
-    :return: список слов, представляющих число
+
+    :param integer_part: Целая часть числа
+    :param gender: Род числа (мужской или женский)
+    :return: Список слов, представляющих число
     """
 
     def parse_units(unit_number: int,
@@ -176,11 +184,12 @@ def parse_number_to_word(number: float,
                          gender: Literal["masculine", "feminine"] = None) -> str:
     """
     Конвертирует число в строку, записанную словами.
-    :param number: число
-    :param numerator: числитель дробной части (если есть)
-    :param denominator: знаменатель дробной части (если есть)
-    :param gender: род числа (мужской или женский)
-    :return: строка с числом, записанным словами
+
+    :param number: Число для преобразования
+    :param numerator: Числитель дробной части, если есть
+    :param denominator: Знаменатель дробной части, если есть
+    :param gender: Род числа (мужской или женский)
+    :return: Число, записанное словами
     """
     logger.debug(f"Getting number {number}")
     if number == 0: return "ноль"
@@ -259,9 +268,10 @@ def parse_number_to_word(number: float,
 
 def parse_word_to_number(word_num: str) -> Fraction:
     """
-    Конвертирует строку с числом, записанным словами в число
-    :param word_num: число, записанное словами
-    :return: Целое число
+    Конвертирует строку с числом, записанным словами, в число.
+
+    :param word_num: Число, записанное словами
+    :return: Число в виде объекта Fraction
     """
     words: list[str] = word_num.lower().split()
 
@@ -336,4 +346,4 @@ if __name__ == '__main__':
     text = parse_number_to_word(1002.22222222)
     print(text)
     number = parse_word_to_number("девятнадцать и восемьдесят две сотых")
-    print(number.numerator, number.denominator)  # Вывод: Fraction(1982, 100)
+    print(number.numerator, number.denominator)
